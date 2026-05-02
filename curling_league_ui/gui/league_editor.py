@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget,
                              QLineEdit, QLabel, QMessageBox, QFileDialog)
+from PyQt5.QtCore import Qt
 from module5.league_database import LeagueDatabase
 from module5.team import Team
 from gui.team_editor import TeamEditor
@@ -9,7 +10,8 @@ class LeagueEditor(QWidget):
 
     def __init__(self, league, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(400, 380)
+        self.setWindowFlag(Qt.Window)
+        self.setMinimumSize(500, 480)
 
         self._league = league
         self._team_editor = None
@@ -29,16 +31,17 @@ class LeagueEditor(QWidget):
         main_layout.addLayout(import_export_layout)
 
         import_button = QPushButton("Import teams")
-        import_button.clicked.connect(self.import_teams)
+        import_button.clicked.connect(self._import_teams)
         import_export_layout.addWidget(import_button)
 
         export_button = QPushButton("Export teams")
-        export_button.clicked.connect(self.export_teams)
+        export_button.clicked.connect(self._export_teams)
         import_export_layout.addWidget(export_button)
 
         main_layout.addWidget(QLabel("Teams:"))
 
         self._team_list = QListWidget()
+        self._team_list.itemDoubleClicked.connect(lambda _: self._edit_team())
         main_layout.addWidget(self._team_list)
 
         main_layout.addWidget(QLabel("New team name:"))
@@ -129,7 +132,7 @@ class LeagueEditor(QWidget):
                                              QMessageBox.Yes | QMessageBox.No)
         if user_response == QMessageBox.Yes:
             try:
-                self._league_remove_team(team)
+                self._league.remove_team(team)
                 self._refresh_team_list()
             except Exception as e:
                 QMessageBox.warning(self, "Cannot Delete", str(e))

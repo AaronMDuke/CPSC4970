@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Curling League Manager")
-        self.setMinimumSize(400, 350)
+        self.setMinimumSize(500, 450)
 
         self._league_editor = None
 
@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(QLabel("Leagues:"))
 
         self._league_list = QListWidget()
+        self._league_list.itemDoubleClicked.connect(lambda _: self._edit_league())
         main_layout.addWidget(self._league_list)
 
         main_layout.addWidget(QLabel("New league name:"))
@@ -115,7 +116,7 @@ class MainWindow(QMainWindow):
             return
 
         user_response = QMessageBox.question(self, "Confirm delete",
-                                             f"Are you sure you want to delete {league_name}?",
+                                             f"Are you sure you want to delete {league.name}?",
                                              QMessageBox.Yes | QMessageBox.No)
         if user_response == QMessageBox.Yes:
             LeagueDatabase.instance().remove_league(league)
@@ -129,7 +130,8 @@ class MainWindow(QMainWindow):
             return
 
         if self._league_editor is not None and self._league_editor.isVisible():
-            self._league_editor.load_league(league)
+            self._league_editor.raise_()
+            self._league_editor.activateWindow()
         else:
             self._league_editor = LeagueEditor(league, self)
             self._league_editor.show()

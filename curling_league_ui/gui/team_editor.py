@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QListWidget, QLineEdit,
                              QHBoxLayout, QPushButton, QMessageBox)
-
+from PyQt5.QtCore import Qt
 from module5.league_database import LeagueDatabase
 from module5.team_member import TeamMember
 from module5.custom_exception import DuplicateEmail, DuplicateOid
@@ -10,7 +10,8 @@ class TeamEditor(QWidget):
 
     def __init__(self, team, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(420, 400)
+        self.setWindowFlag(Qt.Window)
+        self.setMinimumSize(520, 500)
 
         self._team = team
         self._setup_ui()
@@ -106,7 +107,7 @@ class TeamEditor(QWidget):
 
         try:
             new_member = TeamMember(LeagueDatabase.instance().next_oid(), name, email)
-            self._team_add_member(new_member)
+            self._team.add_member(new_member)
             self._clear_fields()
             self._refresh_member_list()
         except DuplicateEmail as e:
@@ -118,14 +119,14 @@ class TeamEditor(QWidget):
     def _update_member(self):
         member = self._get_current_member()
         if member is None:
-            QMessageBox.information(self, "No Selection", "Enter a member name first.")
+            QMessageBox.information(self, "No Selection", "Select a member first.")
             return
 
         name = self._name_input.text().strip()
         email = self._email_input.text().strip()
 
         if name == "":
-            QMessageBox.warning(self, "Error", "Enter a member name.")
+            QMessageBox.warning(self, "Error", "Select a member..")
             return
 
         if email == "":
@@ -155,6 +156,6 @@ class TeamEditor(QWidget):
                                              f"Are you sure you want to delete {member.name}?",
                                              QMessageBox.Yes | QMessageBox.No,)
         if user_response == QMessageBox.Yes:
-            self._team_remove_member(member)
+            self._team.remove_member(member)
             self._clear_fields()
             self._refresh_member_list()
